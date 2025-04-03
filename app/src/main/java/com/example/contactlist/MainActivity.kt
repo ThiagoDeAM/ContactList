@@ -1,19 +1,15 @@
 package com.example.contactlist
 
 //noinspection SuspiciousImport
-import android.R
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.contactlist.Constant.EXTRA_CONTACT
 import com.example.contactlist.databinding.ActivityMainBinding
 
@@ -27,7 +23,9 @@ class MainActivity : AppCompatActivity() {
 
     // Adapter
     private val contactAdapter: ArrayAdapter<String> by lazy {
-        ArrayAdapter(this, R.layout.simple_list_item_1,
+        ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
             contactList.map {
                 "${it.name} - ${it.email}"
             })
@@ -43,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.subtitle = getString(R.string.contact_list)
 
         carl = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            result ->
             if(result.resultCode == RESULT_OK){
                 val contact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
                     result.data?.getParcelableExtra(EXTRA_CONTACT, Contact::class.java)
