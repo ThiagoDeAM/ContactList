@@ -1,9 +1,11 @@
-package com.example.contactlist
+package com.example.contactlist.ui
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.contactlist.Constant.EXTRA_CONTACT
+import com.example.contactlist.model.Constant.EXTRA_CONTACT
+import com.example.contactlist.model.Contact
+import com.example.contactlist.R
 import com.example.contactlist.databinding.ActivityContactBinding
 
 class ContactActivity : AppCompatActivity() {

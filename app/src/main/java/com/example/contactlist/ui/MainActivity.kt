@@ -1,16 +1,23 @@
-package com.example.contactlist
+package com.example.contactlist.ui
 
 //noinspection SuspiciousImport
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.example.contactlist.Constant.EXTRA_CONTACT
+import com.example.contactlist.model.Constant.EXTRA_CONTACT
+import com.example.contactlist.model.Contact
+import com.example.contactlist.R
+import com.example.contactlist.adapter.ContactAdapter
 import com.example.contactlist.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -22,13 +29,8 @@ class MainActivity : AppCompatActivity() {
     private val contactList: MutableList<Contact> = mutableListOf()
 
     // Adapter
-    private val contactAdapter: ArrayAdapter<String> by lazy {
-        ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            contactList.map {
-                "${it.name} - ${it.email}"
-            })
+    private val contactAdapter: ContactAdapter by lazy {
+        ContactAdapter(this, contactList)
     }
 
     private lateinit var carl: ActivityResultLauncher<Intent>
@@ -51,12 +53,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 contact?.let{
                     contactList.add(it)
-                    contactAdapter.add("${it.name} - ${it.email}")
+                    contactAdapter.notifyDataSetChanged()
                 }
             }
         }
 
         fillContactList()
+        registerForContextMenu(amb.contactLv)
 
         amb.contactLv.adapter = contactAdapter
     }
@@ -76,15 +79,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateContextMenu(
+        menu: ContextMenu?,
+        v: View?,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        menuInflater.inflate(R.menu.context_menu_main, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val position = (item.menuInfo as AdapterView.AdapterContextMenuInfo).position
+
+        return when(item.itemId){
+            R.id.remove_contact_mi -> {
+                contactList.removeAt(position)
+                contactAdapter.notifyDataSetChanged()
+                Toast.makeText(this, "Contact removed!", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.edit_contact_mi -> { true }
+            else -> { false }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterForContextMenu(amb.contactLv)
+    }
+
     private fun fillContactList(){
         for (i in 1 .. 50){
             contactList.add(
                 Contact(
                     1,
-                    "nome $i",
-                    "endereco $i",
-                    "phone $i",
-                    "email $i"
+                    "Name $i",
+                    "Address $i",
+                    "Phone $i",
+                    "Email $i"
                 )
             )
         }

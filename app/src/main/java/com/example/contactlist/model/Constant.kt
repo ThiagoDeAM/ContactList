@@ -1,4 +1,4 @@
-package com.example.contactlist
+package com.example.contactlist.model
 
 object Constant {
     const val EXTRA_CONTACT = "EXTRA_CONTACT"

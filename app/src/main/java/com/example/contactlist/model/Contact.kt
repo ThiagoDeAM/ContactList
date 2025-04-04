@@ -1,7 +1,7 @@
-package com.example.contactlist
+package com.example.contactlist.model
 
 import android.os.Parcelable
-import com.example.contactlist.Constant.INVALID_CONTACT_ID
+import com.example.contactlist.model.Constant.INVALID_CONTACT_ID
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
