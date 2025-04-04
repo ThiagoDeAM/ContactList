@@ -16,6 +16,8 @@ class ContactAdapter(context: Context, private val contactList: MutableList<Cont
         context,
         R.layout.tile_contact,
         contactList) {
+
+        // !!! ENTENDER ESSA FUNÇÃO !!!
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         // Recuperar o contato que será usado para preencher os dados da célula
         val contact = contactList[position]

@@ -19,6 +19,7 @@ import com.example.contactlist.model.Contact
 import com.example.contactlist.R
 import com.example.contactlist.adapter.ContactAdapter
 import com.example.contactlist.databinding.ActivityMainBinding
+import com.example.contactlist.model.Constant.EXTRA_VIEW_CONTACT
 
 class MainActivity : AppCompatActivity() {
     private val amb: ActivityMainBinding by lazy {
@@ -51,15 +52,37 @@ class MainActivity : AppCompatActivity() {
                 else{
                     result.data?.getParcelableExtra<Contact>(EXTRA_CONTACT)
                 }
-                contact?.let{
-                    contactList.add(it)
+                contact?.let{ receveidContact ->
+                    // Verificar se é um novo conato ou se é um contato editado
+                    val position = contactList.indexOfFirst { it.id ==  receveidContact.id }
+                    if (position == -1){
+                        contactList.add(receveidContact)
+                    }
+                    else{
+                        contactList[position] = receveidContact
+                    }
                     contactAdapter.notifyDataSetChanged()
                 }
             }
         }
 
-        fillContactList()
         registerForContextMenu(amb.contactLv)
+
+        amb.contactLv.onItemClickListener = object: AdapterView.OnItemClickListener {
+            override fun onItemClick(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                Intent(this@MainActivity, ContactActivity::class.java).apply {
+                    putExtra(EXTRA_CONTACT, contactList[position])
+                    putExtra(EXTRA_VIEW_CONTACT, true)
+                    startActivity(this)
+                }
+            }
+        }
+
 
         amb.contactLv.adapter = contactAdapter
     }
@@ -97,7 +120,14 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Contact removed!", Toast.LENGTH_SHORT).show()
                 true
             }
-            R.id.edit_contact_mi -> { true }
+            R.id.edit_contact_mi -> {
+                Intent(this, ContactActivity::class.java).apply {
+                    putExtra(EXTRA_CONTACT, contactList[position])
+                    carl.launch(this)
+                }
+
+                true
+            }
             else -> { false }
         }
     }
@@ -107,17 +137,4 @@ class MainActivity : AppCompatActivity() {
         unregisterForContextMenu(amb.contactLv)
     }
 
-    private fun fillContactList(){
-        for (i in 1 .. 50){
-            contactList.add(
-                Contact(
-                    1,
-                    "Name $i",
-                    "Address $i",
-                    "Phone $i",
-                    "Email $i"
-                )
-            )
-        }
-    }
 }
