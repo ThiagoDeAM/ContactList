@@ -2,9 +2,14 @@ package com.example.contactlist.adapter
 
 import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.ViewGroup
+import android.widget.Adapter
+import android.widget.AdapterView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.example.contactlist.R
 import com.example.contactlist.databinding.TileContactBinding
 import com.example.contactlist.model.Contact
 import com.example.contactlist.ui.OnContactClickListener
@@ -16,6 +21,23 @@ class ContactRvAdapter(
     inner class ContactViewHolder(tcb: TileContactBinding): RecyclerView.ViewHolder(tcb.root){
         val nameTv: TextView = tcb.nameTv
         val emailTv: TextView = tcb.emailTv
+
+        init {
+            // Criando o menu de contexto para cada célula associada a um novo holder
+            tcb.root.setOnCreateContextMenuListener{ menu, v, menuInfo ->
+                (onContactClickListener as AppCompatActivity).menuInflater.inflate(R.menu.context_menu_main, menu)
+                menu.findItem(R.id.edit_contact_mi).setOnMenuItemClickListener {
+                    onContactClickListener.onEditContactMenuItemClick(adapterPosition)
+                    true
+                }
+                menu.findItem(R.id.remove_contact_mi).setOnMenuItemClickListener {
+                    onContactClickListener.onRemoveContactMenuItemClick(adapterPosition)
+                    true
+                }
+            }
+            // Iniciando o listener de clique curto na célula associada a um novo holder
+            tcb.root.setOnClickListener{ onContactClickListener.onContactClick(adapterPosition)}
+        }
     }
 
     // Criar um ViewHolder significa inflar uma célula. Para criar a célula:
@@ -41,9 +63,6 @@ class ContactRvAdapter(
             with(holder) {
                 nameTv.text = contact.name
                 emailTv.text = contact.email
-                holder.itemView.setOnClickListener {
-                    onContactClickListener.onContactClick(position)
-                }
             }
         }
     }
