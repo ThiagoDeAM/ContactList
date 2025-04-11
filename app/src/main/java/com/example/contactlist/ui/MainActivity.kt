@@ -20,6 +20,7 @@ import com.example.contactlist.model.Contact
 import com.example.contactlist.R
 import com.example.contactlist.adapter.ContactAdapter
 import com.example.contactlist.adapter.ContactRvAdapter
+import com.example.contactlist.controller.MainController
 import com.example.contactlist.databinding.ActivityMainBinding
 import com.example.contactlist.model.Constant.EXTRA_VIEW_CONTACT
 
@@ -37,6 +38,13 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
     }
 
     private lateinit var carl: ActivityResultLauncher<Intent>
+
+    // Controller
+    // --> Database Inspector
+    /*
+    private val mainController: MainController by lazy {
+        mainController(this)
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +68,7 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
                     if (position == -1){
                         contactList.add(receveidContact)
                         contactAdapter.notifyItemInserted(contactList.lastIndex)
+                        mainController.insertContact(receveidContact)
                     }
                     else{
                         contactList[position] = receveidContact
