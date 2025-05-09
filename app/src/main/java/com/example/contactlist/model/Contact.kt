@@ -5,8 +5,9 @@ import com.example.contactlist.model.Constant.INVALID_CONTACT_ID
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
+@Entity
 data class Contact(
-    var id: Int? = INVALID_CONTACT_ID,
+    @PrimaryKey(autoGenerate = true) var id: Int? = INVALID_CONTACT_ID,
     var name: String = "",
     var address: String = "",
     var phone: String = "",
