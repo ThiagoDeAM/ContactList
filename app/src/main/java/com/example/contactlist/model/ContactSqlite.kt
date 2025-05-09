@@ -59,8 +59,10 @@ class ContactSqlite(context: Context): ContactDao {
         TODO("Not yet implemented")
     }
 
-    override fun deleteContact(id: Int): Int {
-        TODO("Not yet implemented")
+    override fun deleteContact(contact: Contact): Int {
+        CONTACT_TABLE,
+        "$ID_COLUMN = ?",
+        arrayOf(contact.id.toString())
     }
 
     private fun Contact.toContentValues(): ContentValues {
