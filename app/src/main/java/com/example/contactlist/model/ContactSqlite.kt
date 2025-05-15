@@ -3,6 +3,7 @@ package com.example.contactlist.model
 import android.content.ContentValues
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.example.contactlist.R
@@ -48,20 +49,51 @@ class ContactSqlite(context: Context): ContactDao {
 
 
     override fun retrieveContact(id: Int): Contact {
-        TODO("Not yet implemented")
+        val cursor = contactDatabase.query(
+            true,
+            CONTACT_TABLE,
+            null,
+            "$ID_COLUMN = ?",
+            arrayOf(id.toString()),
+            null,
+            null,
+            null,
+            null
+        )
+
+        return if(cursor.moveToFirst()) {
+            cursor.toContact()
+        }
+        else {
+            Contact()
+        }
     }
 
     override fun retrieveContacts(): MutableList<Contact> {
-        TODO("Not yet implemented")
+        val contactList: MutableList<Contact> = mutableListOf()
+
+        val cursor = contactDatabase.rawQuery("SELECT * FROM $CONTACT_TABLE;", null)
+
+        while (cursor.moveToNext()) {
+            contactList.add(cursor.toContact())
+        }
+
+        return contactList
     }
 
-    override fun updateContact(contact: Contact): Int {
-        TODO("Not yet implemented")
-    }
+    override fun updateContact(contact: Contact) = contactDatabase.update(
+        CONTACT_TABLE,
+        contact.toContentValues(),
+        "$ID_COLUMN = ?",
+        arrayOf(contact.id.toString())
+    )
 
-    override fun deleteContact(id: Int): Int {
-        TODO("Not yet implemented")
-    }
+    override fun deleteContact(contact: Contact) = contactDatabase.delete(
+        CONTACT_TABLE,
+        "$ID_COLUMN = ?",
+        arrayOf(contact.id.toString())
+    )
+
 
     private fun Contact.toContentValues(): ContentValues {
         return ContentValues().apply {
@@ -72,4 +104,12 @@ class ContactSqlite(context: Context): ContactDao {
             put(EMAIL_COLUMN, email)
         }
     }
+    //Selecionar a linha atual do cursor e converter para um contato
+    private fun Cursor.toContact() = Contact(
+        id = getInt(getColumnIndexOrThrow(ID_COLUMN)),
+        name = getString(getColumnIndexOrThrow(NAME_COLUMN)),
+        address = getString(getColumnIndexOrThrow(ADDRESS_COLUMN)),
+        phone = getString(getColumnIndexOrThrow(PHONE_COLUMN)),
+        email = getString(getColumnIndexOrThrow(EMAIL_COLUMN))
+    )
 }
