@@ -4,6 +4,9 @@ package com.example.contactlist.ui
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
@@ -22,6 +25,7 @@ import com.example.contactlist.adapter.ContactAdapter
 import com.example.contactlist.adapter.ContactRvAdapter
 import com.example.contactlist.controller.MainController
 import com.example.contactlist.databinding.ActivityMainBinding
+import com.example.contactlist.model.Constant.EXTRA_CONTACT_ARRAY
 import com.example.contactlist.model.Constant.EXTRA_VIEW_CONTACT
 
 class MainActivity : AppCompatActivity(), OnContactClickListener {
@@ -43,6 +47,35 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
     // --> Database Inspector
     private val mainController: MainController by lazy {
         MainController(this)
+    }
+
+    // Handler
+    companion object {
+        const val GET_CONTACTS_MESSAGE = 1
+        const val GET_CONTACTS_INTERVAL = 2000L
+    }
+    val getContactsHandler = object: Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            if (msg.what == GET_CONTACTS_MESSAGE) {
+                mainController.getContacts()
+                sendMessageDelayed(
+                    obtainMessage().apply { what = GET_CONTACTS_MESSAGE },
+                    GET_CONTACTS_INTERVAL
+                )
+            }
+            else {
+                val contactArray = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                    msg.data.getParcelableArray(EXTRA_CONTACT_ARRAY, Contact::class.java)
+                }
+                else{
+                    msg.data.getParcelableArray(EXTRA_CONTACT_ARRAY)
+                }
+                contactList.clear()
+                contactArray?.forEach { contactList.add(it as Contact) }
+                contactAdapter.notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +114,10 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
         amb.contactRv.adapter = contactAdapter
         amb.contactRv.layoutManager = LinearLayoutManager(this)
 
-        fillContactList()
+        getContactsHandler.sendMessageDelayed(
+            Message().apply { what = GET_CONTACTS_MESSAGE },
+            GET_CONTACTS_INTERVAL
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -123,14 +159,5 @@ class MainActivity : AppCompatActivity(), OnContactClickListener {
             putExtra(EXTRA_CONTACT, contactList[position])
             carl.launch(this)
         }
-    }
-
-    private fun fillContactList() {
-        contactList.clear()
-        Thread {
-            contactList.addAll(mainController.getContacts())
-            contactAdapter.notifyDataSetChanged()
-        }.start()
-
     }
 }
